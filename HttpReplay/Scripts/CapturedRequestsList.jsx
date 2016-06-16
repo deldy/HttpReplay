@@ -133,7 +133,7 @@ window.CapturedRequestsList = React.createClass({
                                 <td className="alignTop"><strong>Headers:</strong></td>
                                 <td className="headersContent">
                                     <table>
-                                        {dataItem.Headers.map(that.createHeaderItem)}
+                                        {dataItem.Headers && dataItem.Headers.map(that.createHeaderItem)}
                                     </table>
                                 </td>
                             </tr>
@@ -165,5 +165,5 @@ window.CapturedRequestsList = React.createClass({
 
 $(function() {
 	var mountNode = document.getElementById("CapturedRequestsList");
-    React.renderComponent(CapturedRequestsList({ dataUrl: "/HttpReplay/Home/LoadData", deleteUrl: "/HttpReplay/Home/DeleteAll" }), mountNode);
+    React.renderComponent(CapturedRequestsList({ dataUrl: "/Home/LoadData", deleteUrl: "/Home/DeleteAll" }), mountNode);
 });
