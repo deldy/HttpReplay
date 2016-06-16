@@ -3,7 +3,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HtmlReplay</title>
+    <title>HttpReplay</title>
+
+    <style type="text/css">
+        table.detailsTable {
+            border: none;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        table.detailsTable td {
+            vertical-align: top;
+            padding: 5px;
+        }
+        .alignTop {
+            vertical-align: top !important;
+        }
+        .alignRight {
+            text-align: right !important;
+        }
+        td.headersContent table td {
+            padding: 0 5px 0 0;
+        }
+    </style>
 
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
     
@@ -24,7 +45,7 @@
 </head>
     <body>
         <div class="container">
-            <h1>HtmlReplay</h1>
+            <h1>HttpReplay</h1>
             <div id="CapturedRequestsList"></div>
         </div>
     </body>
