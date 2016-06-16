@@ -11,11 +11,14 @@ using Newtonsoft.Json;
 
 namespace HttpReplay.Controllers
 {
+
     public class HomeController : Controller
     {
         // GET: Home
+        [AllowCrossSiteJson]
         public ActionResult Index()
         {
+            var basePath = GetBasePath();
             return View();
         }
 
@@ -54,25 +57,43 @@ namespace HttpReplay.Controllers
             var basePath = GetBasePath();
             Directory.CreateDirectory(basePath);
 
+            string postedData;
+            using (var streamReader = new StreamReader(Request.InputStream)) {
+                postedData = streamReader.ReadToEnd();
+            }
+
             var id = DateTime.Now.Ticks;
             var info = new CapturedRequestInfo() {
                 Id = id,
                 DateRequested = DateTime.Now.ToString("G", new CultureInfo("da-DK")),
                 UserHostName = Request.UserHostName,
-                Parameters = ToDictionary(Request.Form).ToArray(),
-                Raw = Request.Form.ToString(),
+                QueryString = Request.QueryString.ToString(),
+                BodyData = postedData,
                 Url = "/" + url,
                 Encoding = Request.ContentEncoding.EncodingName.ToString(),
-                HttpMethod = Request.HttpMethod
+                HttpMethod = Request.HttpMethod,
+                Headers = { }
             };
+            var headers = new List<HeaderInfo>();
+            foreach (var key in Request.Headers.Keys) {
+                headers.Add(
+                    new HeaderInfo {
+                        Name = key.ToString(),
+                        Value = Request.Headers.Get(key.ToString())
+                    }
+                );
+            }
+            info.Headers = headers.ToArray();
 
             var json = JsonConvert.SerializeObject(info);
 
             var fileName = id + ".json";
 
-            System.IO.File.WriteAllText(Path.Combine(basePath, fileName), json);
+            try {
+                System.IO.File.WriteAllText(Path.Combine(basePath, fileName), json);
+            } catch { }
 
-            return Content("OK");
+            return new HttpStatusCodeResult(200, "All done");
         }
 
         private string GetBasePath()
@@ -80,27 +101,25 @@ namespace HttpReplay.Controllers
             return Server.MapPath("~/App_Data/CapturedRequests");
         }
 
-        public static Dictionary<string, string> ToDictionary(NameValueCollection col)
-        {
-            var dict = new Dictionary<string, string>();
+    }
 
-            foreach (var key in col.Keys) {
-                dict.Add((string)key, col[(string)key]);
-            }
+    public class HeaderInfo
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
 
-            return dict;
-        }
     }
 
     public class CapturedRequestInfo
     {
         public long Id { get; set; }
         public string UserHostName { get; set; }
-        public KeyValuePair<string, string>[] Parameters { get; set; }
         public string DateRequested { get; set; }
-        public string Raw { get; set; }
+        public string QueryString { get; set; }
+        public string BodyData { get; set; }
         public string Url { get; set; }
         public string Encoding { get; set; }
+        public HeaderInfo[] Headers { get; set; }
         public string HttpMethod { get; set; }
     }
 }
